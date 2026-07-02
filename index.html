@@ -241,14 +241,14 @@
         </section>
         <section class="bg-slate-800 rounded-2xl p-4">
           <h3 class="text-sm font-bold text-blue-400 mb-3 tracking-wide uppercase">💬 この店長への接し方メモ</h3>
-          <textarea id="managerTips" rows="4" placeholder="例：数字より現場ストーリーで話すと響く。承認ファーストで..." class="w-full rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+          <textarea id="managerTips" rows="25" placeholder="例：数字より現場ストーリーで話すと響く。承認ファーストで..." class="w-full rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
         </section>
       </div>
 
-      <!-- TAB 2: Staff Egogram -->
-      <div id="tab2" class="tab-content hidden p-4 flex flex-col gap-4">
+      <!-- TAB 2: Staff -->
+      <div id="tab2" class="tab-content hidden p-4 flex flex-col gap-3">
         <div id="staffList" class="flex flex-col gap-3"></div>
-        <button onclick="addStaff()" class="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-3 rounded-xl text-sm active:scale-95 transition-all">＋ スタッフを追加</button>
+        <button onclick="addStaff()" class="w-full text-sm font-bold text-blue-400 border border-blue-800 rounded-xl py-3 hover:bg-blue-900/30 active:scale-95 transition-all">＋ メンバーを追加</button>
       </div>
     </div>
 
@@ -410,41 +410,28 @@ function removeChecklistItem(i) {
 function renderStaffList(s) {
   const container = document.getElementById('staffList');
   container.innerHTML = '';
-  (s.staff || []).forEach((st, i) => {
+  if (!s.staff || s.staff.length === 0) {
+    container.innerHTML = '<div class="text-center text-slate-600 text-sm py-6">メンバーがいません</div>';
+    return;
+  }
+  s.staff.forEach((st, i) => {
     const div = document.createElement('div');
-    div.className = 'bg-slate-800 rounded-2xl p-4 flex flex-col gap-2.5 border border-slate-700';
+    div.className = 'bg-slate-800 rounded-2xl p-4 flex flex-col gap-3 border border-slate-700';
     div.innerHTML = `
-      <div class="flex gap-2">
-        <input type="text" value="${st.name||''}" placeholder="名前" oninput="updateStaff(${i},'name',this.value)"
-          class="flex-1 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
-        <input type="text" value="${st.role||''}" placeholder="役職" oninput="updateStaff(${i},'role',this.value)"
-          class="w-24 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
-      </div>
-      <div class="bg-slate-900 rounded-xl p-3">
-        <div class="text-xs text-slate-400 mb-2 font-medium">エゴグラム（各1〜20）</div>
-        <div class="flex flex-col gap-2">
-          ${['CP','NP','A','FC','AC'].map(key => {
-            const val = (st.ego && st.ego[key] !== undefined && st.ego[key] !== '') ? st.ego[key] : '';
-            const colors = {CP:'bg-red-500',NP:'bg-amber-400',A:'bg-blue-500',FC:'bg-emerald-500',AC:'bg-purple-500'};
-            const barW = val !== '' ? Math.round((Number(val)-1)/19*100) : 0;
-            const opts = Array.from({length:20},(_,n)=>n+1).map(n=>`<option value="${n}" ${Number(val)===n?'selected':''}>${n}</option>`).join('');
-            return `<div class="flex items-center gap-2">
-              <span class="text-xs font-bold w-6 text-slate-300 shrink-0">${key}</span>
-              <div class="flex-1 h-4 bg-slate-700 rounded-full overflow-hidden">
-                <div class="${colors[key]} h-full rounded-full transition-all duration-300" style="width:${barW}%"></div>
-              </div>
-              <select onchange="updateEgo(${i},'${key}',this.value)"
-                class="w-16 rounded-lg px-1 py-1 text-sm text-center outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">—</option>
-                ${opts}
-              </select>
-            </div>`;
-          }).join('')}
+      <div class="flex items-center gap-2 justify-between">
+        <div class="flex gap-2 flex-1">
+          <input type="text" value="${st.name||''}" placeholder="名前" oninput="updateStaff(${i},'name',this.value)"
+            class="flex-1 rounded-lg px-3 py-2 text-base font-bold outline-none focus:ring-2 focus:ring-blue-500">
+          <input type="text" value="${st.role||''}" placeholder="役職" oninput="updateStaff(${i},'role',this.value)"
+            class="w-24 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
         </div>
+        <button onclick="removeStaff(${i})" class="text-slate-500 hover:text-red-400 transition-colors text-lg leading-none w-8 h-8 flex items-center justify-center shrink-0">✕</button>
       </div>
-      <textarea rows="2" placeholder="接し方のコツ・特徴メモ" oninput="updateStaff(${i},'tips',this.value)"
-        class="w-full rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none">${st.tips||''}</textarea>
-      <button onclick="removeStaff(${i})" class="text-right text-xs text-slate-500 hover:text-red-400 transition-colors">このスタッフを削除</button>
+      <div>
+        <div class="text-xs text-blue-400 font-bold mb-1 tracking-wide uppercase">🧠 特徴・接し方メモ</div>
+        <textarea rows="25" placeholder="例：責任感が強く真面目。数字で示すと動きやすい。褒めると伸びるタイプ。シフト調整は早めに相談を..." oninput="updateStaff(${i},'tips',this.value)"
+          class="w-full rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-blue-500 resize-none">${st.tips||''}</textarea>
+      </div>
     `;
     container.appendChild(div);
   });
@@ -452,18 +439,12 @@ function renderStaffList(s) {
 function addStaff() {
   const s = getStore(currentStoreId); if (!s) return;
   if (!s.staff) s.staff = [];
-  s.staff.push({ name:'', role:'', ego:{CP:'',NP:'',A:'',FC:'',AC:''}, tips:'' });
+  s.staff.push({ name:'', role:'', tips:'' });
   renderStaffList(s);
 }
 function updateStaff(i, key, val) {
-  const s = getStore(currentStoreId); if (!s) return; s.staff[i][key] = val;
-}
-function updateEgo(i, key, val) {
   const s = getStore(currentStoreId); if (!s) return;
-  if (!s.staff[i].ego) s.staff[i].ego = {};
-  s.staff[i].ego[key] = val === '' ? '' : Math.min(20, Math.max(1, Number(val)));
-  // update bar width live
-  renderStaffList(s);
+  s.staff[i][key] = val;
 }
 function removeStaff(i) {
   const s = getStore(currentStoreId); if (!s) return;
